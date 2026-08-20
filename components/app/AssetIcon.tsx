@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/cn";
 import {
   EurcLogo,
@@ -7,9 +9,10 @@ import {
   UsdcLogo,
   XlmLogo,
 } from "@/components/app/TokenLogos";
+import { useAssetLogos } from "@/hooks/useAssetLogos";
 import type { ReactNode } from "react";
 
-const LOGOS: Record<string, (size: number) => ReactNode> = {
+const FALLBACK: Record<string, (size: number) => ReactNode> = {
   USDC: (s) => <UsdcLogo size={s} />,
   XLM: (s) => <XlmLogo size={s} />,
   tBILL: (s) => <TbillLogo size={s} />,
@@ -25,7 +28,10 @@ export function AssetIcon({
   symbol: string;
   size?: number;
 }) {
-  const logo = LOGOS[symbol];
+  const logos = useAssetLogos();
+  const src = logos[symbol];
+  const fallback = FALLBACK[symbol];
+
   return (
     <span
       className={cn(
@@ -34,12 +40,19 @@ export function AssetIcon({
       style={{ width: size, height: size }}
       title={symbol}
     >
-      {logo ? (
-        logo(size)
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt=""
+          width={size}
+          height={size}
+          className="h-full w-full object-cover"
+        />
+      ) : fallback ? (
+        fallback(size)
       ) : (
-        <span
-          className="grid h-full w-full place-items-center bg-white font-sans text-[11px] font-bold text-black"
-        >
+        <span className="grid h-full w-full place-items-center bg-white font-sans text-[11px] font-bold text-black">
           {symbol.slice(0, 2)}
         </span>
       )}
