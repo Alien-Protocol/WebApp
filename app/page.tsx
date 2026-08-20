@@ -106,10 +106,10 @@ export default function Home() {
 
 
   const typed = useTypewriter([
-    "Privacy-preserving usernames for Stellar.",
-    "Send crypto to @username — not a long address.",
-    "Your identity. Zero-knowledge. On-chain.",
-    "One username. One identity. Built for Stellar.",
+    "Turn tokenized RWAs into borrowing power",
+    "Deposit treasuries. Borrow USDC. Stay in control",
+    "Real-world collateral. On-chain credit. Built on Stellar",
+    "One vault. One health factor. Capital that actually works",
   ]);
 
   // Fade-in hero on mount
@@ -198,6 +198,12 @@ export default function Home() {
           border-color: #fff;
           color: #000;
           background: #fff;
+        }
+        .github-btn:hover .shimmer-text {
+          animation: none;
+          background: none;
+          -webkit-text-fill-color: #000;
+          color: #000;
         }
 
         /* notify btn */
@@ -312,10 +318,7 @@ export default function Home() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <a href="/app" className="github-btn">
-              Launch App
-            </a>
-            <a href="https://github.com/Alien-Protocol" target="_blank" rel="noreferrer" className="github-btn">
-              GitHub ↗
+              <span className="shimmer-text">Launch App</span>
             </a>
           </div>
         </nav>
@@ -421,10 +424,6 @@ export default function Home() {
           <div className="footer-links font-raj" style={{ display: "flex", alignItems: "center", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", flexWrap: "wrap" }}>
             <a href="https://github.com/Alien-Protocol" target="_blank" rel="noreferrer" className="footer-link">GitHub</a>
             <span>Built on Stellar</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <span style={{ width: 7, height: 7, backgroundColor: "rgba(255,255,255,0.6)", display: "inline-block", borderRadius: "50%", animation: "blink 2s infinite" }} />
-              ZK-Powered
-            </span>
           </div>
         </footer>
       </div>
