@@ -10,7 +10,7 @@ import { useTx } from "@/context/TxContext";
 import { useWallet } from "@/context/WalletContext";
 import { useProtocolState } from "@/hooks/useProtocol";
 import { formatUsd, parseAmount } from "@/lib/format";
-import { ADDRESSES, BORROW_APR_BPS } from "@/lib/mock/constants";
+import { ADDRESSES, BORROW_APR_BPS } from "@/lib/protocol/constants";
 import {
   borrowLimitRemaining,
   ltvPct,
@@ -19,8 +19,8 @@ import {
   priceOf,
   splitRepay,
   weightedLiqUsd,
-} from "@/lib/mock/math";
-import { derivePosition } from "@/lib/mock/store";
+} from "@/lib/protocol/math";
+import { derivePosition } from "@/lib/protocol/selectors";
 import { pool } from "@/lib/protocol";
 import { useState } from "react";
 

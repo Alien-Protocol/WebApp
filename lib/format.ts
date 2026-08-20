@@ -1,4 +1,4 @@
-import { BPS_DENOM } from "@/lib/mock/constants";
+import { BPS_DENOM } from "@/lib/protocol/constants";
 
 export function truncateAddress(address: string, lead = 4, tail = 4): string {
   if (address.length <= lead + tail + 1) return address;

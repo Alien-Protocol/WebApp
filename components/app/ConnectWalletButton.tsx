@@ -3,7 +3,7 @@
 import { useWallet } from "@/context/WalletContext";
 import { useProtocolState } from "@/hooks/useProtocol";
 import { formatAmount, truncateAddress } from "@/lib/format";
-import { ADDRESSES } from "@/lib/mock/constants";
+import { ADDRESSES } from "@/lib/protocol/constants";
 import { AssetIcon } from "@/components/app/AssetIcon";
 import { useState } from "react";
 

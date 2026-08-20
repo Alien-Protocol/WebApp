@@ -10,8 +10,8 @@ import { useTx } from "@/context/TxContext";
 import { useWallet } from "@/context/WalletContext";
 import { useProtocolState } from "@/hooks/useProtocol";
 import { formatUsd, parseAmount } from "@/lib/format";
-import { ADDRESSES, BORROW_APR_BPS } from "@/lib/mock/constants";
-import { supplierApyPct } from "@/lib/mock/math";
+import { ADDRESSES, BORROW_APR_BPS } from "@/lib/protocol/constants";
+import { supplierApyPct } from "@/lib/protocol/math";
 import { pool } from "@/lib/protocol";
 import { useState } from "react";
 

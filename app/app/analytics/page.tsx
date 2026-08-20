@@ -6,9 +6,8 @@ import { UtilizationBar } from "@/components/app/UtilizationBar";
 import { PageHeader } from "@/components/app/PageHeader";
 import { useProtocolState } from "@/hooks/useProtocol";
 import { formatHf, formatUsd, relativeTime } from "@/lib/format";
-import { ANALYTICS_HISTORY, LIQUIDATION_STATS } from "@/lib/mock/seed";
-import { holdingsToCollateral } from "@/lib/mock/math";
-import { allUsers, derivePosition } from "@/lib/mock/store";
+import { holdingsToCollateral } from "@/lib/protocol/math";
+import { derivePosition, listUsers } from "@/lib/protocol/selectors";
 import {
   Area,
   AreaChart,
@@ -26,14 +25,16 @@ const COLORS = ["#ffffff", "#c8c8c8", "#8a8a8a", "#5c5c5c"];
 
 export default function AnalyticsPage() {
   const state = useProtocolState();
-  const positions = allUsers().map((u) => derivePosition(u, state));
+  const users = listUsers(state);
+  const positions = users.map((u) => derivePosition(u, state));
+  const { history, liquidationStats } = state.analytics;
   const hfs = positions
     .map((p) => p.healthFactor)
     .filter((h): h is number => h !== "inf");
   const avgHf =
     hfs.reduce((s, h) => s + h, 0) / Math.max(1, hfs.length);
   const mixMap: Record<string, number> = {};
-  for (const u of allUsers()) {
+  for (const u of users) {
     const coll = holdingsToCollateral(
       state.holdings[u] ?? {},
       state.prices,
@@ -45,8 +46,8 @@ export default function AnalyticsPage() {
   }
   const mix = Object.entries(mixMap).map(([name, value]) => ({ name, value }));
   const partialRatio =
-    LIQUIDATION_STATS.partialCount /
-    (LIQUIDATION_STATS.partialCount + LIQUIDATION_STATS.fullCount);
+    liquidationStats.partialCount /
+    Math.max(1, liquidationStats.partialCount + liquidationStats.fullCount);
 
   return (
     <div className="space-y-6">
@@ -61,7 +62,7 @@ export default function AnalyticsPage() {
         />
         <MetricCard
           label="Interest accrued"
-          value={formatUsd(LIQUIDATION_STATS.interestAccruedUsd)}
+          value={formatUsd(liquidationStats.interestAccruedUsd)}
           hint="Protocol lifetime (demo)"
           accent="cyan"
         />
@@ -72,7 +73,7 @@ export default function AnalyticsPage() {
         <h2 className="font-orbitron text-base tracking-wide">14-day TVL & borrow</h2>
         <div className="mt-4 h-56">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={ANALYTICS_HISTORY}>
+            <AreaChart data={history}>
               <CartesianGrid stroke="rgba(255,255,255,0.06)" />
               <XAxis dataKey="day" stroke="#64748b" fontSize={11} />
               <YAxis
@@ -147,8 +148,8 @@ export default function AnalyticsPage() {
         <GlassCard className="space-y-3">
           <h2 className="font-orbitron text-base tracking-wide">Liquidations</h2>
           <p className="text-sm text-white/55">
-            Volume {formatUsd(LIQUIDATION_STATS.volumeUsd)} · partial{" "}
-            {LIQUIDATION_STATS.partialCount} / full {LIQUIDATION_STATS.fullCount}{" "}
+            Volume {formatUsd(liquidationStats.volumeUsd)} · partial{" "}
+            {liquidationStats.partialCount} / full {liquidationStats.fullCount}{" "}
             · partial ratio {(partialRatio * 100).toFixed(0)}%
           </p>
           <h3 className="pt-2 font-raj text-[11px] uppercase tracking-[0.16em] text-white/45">

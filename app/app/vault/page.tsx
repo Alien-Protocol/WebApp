@@ -11,9 +11,9 @@ import { useTx } from "@/context/TxContext";
 import { useWallet } from "@/context/WalletContext";
 import { useProtocolState } from "@/hooks/useProtocol";
 import { formatAmount, formatUsd, parseAmount } from "@/lib/format";
-import { ADDRESSES, MIN_COLLATERAL_RATIO } from "@/lib/mock/constants";
-import { isWithdrawalSafeCalc, priceOf } from "@/lib/mock/math";
-import { derivePosition } from "@/lib/mock/store";
+import { ADDRESSES, MIN_COLLATERAL_RATIO } from "@/lib/protocol/constants";
+import { isWithdrawalSafeCalc, priceOf } from "@/lib/protocol/math";
+import { derivePosition } from "@/lib/protocol/selectors";
 import { vault } from "@/lib/protocol";
 import { useMemo, useState } from "react";
 

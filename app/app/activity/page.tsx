@@ -8,7 +8,8 @@ import { PageHeader } from "@/components/app/PageHeader";
 import { useWallet } from "@/context/WalletContext";
 import { useProtocolState } from "@/hooks/useProtocol";
 import { formatAmount, formatTimestamp, formatUsd, truncateAddress } from "@/lib/format";
-import { ADDRESSES, STELLAR_EXPERT_TX } from "@/lib/mock/constants";
+import { appConfig } from "@/lib/config";
+import { ADDRESSES } from "@/lib/protocol/constants";
 import { cn } from "@/lib/cn";
 
 export default function ActivityPage() {
@@ -78,7 +79,7 @@ export default function ActivityPage() {
                   </td>
                   <td className="px-3 py-3">
                     <a
-                      href={`${STELLAR_EXPERT_TX}/${e.txHash}`}
+                      href={`${appConfig.explorerTxUrl}/${e.txHash}`}
                       target="_blank"
                       rel="noreferrer"
                       className="font-mono text-[11px] text-white hover:underline"

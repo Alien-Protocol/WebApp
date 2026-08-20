@@ -5,8 +5,8 @@ import { BpsBadge } from "@/components/app/BpsBadge";
 import { GlassCard } from "@/components/app/MetricCard";
 import { PageHeader } from "@/components/app/PageHeader";
 import { useProtocolState } from "@/hooks/useProtocol";
-import { ADDRESSES } from "@/lib/mock/constants";
-import type { PoolPauseKey, VaultPauseKey } from "@/lib/mock/types";
+import { ADDRESSES } from "@/lib/protocol/constants";
+import type { PoolPauseKey, VaultPauseKey } from "@/lib/protocol/types";
 import { admin } from "@/lib/protocol";
 import { useState } from "react";
 

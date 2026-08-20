@@ -1,18 +1,16 @@
 "use client";
 
-import { ADDRESSES } from "@/lib/mock/constants";
+import { ADDRESSES } from "@/lib/protocol/constants";
 import {
-  blendedBps,
-  collateralValueUsd,
-  computeHf,
   holdingsToCollateral,
+  collateralValueUsd,
   utilizationBps,
-  weightedLiqUsd,
-} from "@/lib/mock/math";
-import { createSeed, type SeedState } from "@/lib/mock/seed";
-import type { Position } from "@/lib/mock/types";
+} from "@/lib/protocol/math";
+import { createSeed } from "@/lib/protocol/mock/seed";
+import { derivePosition as positionFromSnapshot, listUsers } from "@/lib/protocol/selectors";
+import type { Position, ProtocolSnapshot } from "@/lib/protocol/types";
 
-export type ProtocolState = SeedState;
+export type ProtocolState = ProtocolSnapshot;
 
 let state: ProtocolState = createSeed();
 const listeners = new Set<() => void>();
@@ -27,10 +25,14 @@ export function getState(): ProtocolState {
 
 export function subscribe(listener: () => void): () => void {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
-export function setState(patch: Partial<ProtocolState> | ((s: ProtocolState) => ProtocolState)) {
+export function setState(
+  patch: Partial<ProtocolState> | ((s: ProtocolState) => ProtocolState),
+) {
   state = typeof patch === "function" ? patch(state) : { ...state, ...patch };
   emit();
 }
@@ -41,34 +43,11 @@ export function resetState() {
 }
 
 export function derivePosition(user: string, s: ProtocolState = state): Position {
-  const holdings = s.holdings[user] ?? {};
-  const collateral = holdingsToCollateral(holdings, s.prices, s.assets);
-  const value = collateralValueUsd(collateral);
-  const debt = s.debts[user]?.total ?? 0;
-  const weighted = weightedLiqUsd(collateral, s.assets);
-  return {
-    user,
-    collateral,
-    collateralValueUsd: value,
-    healthFactor: computeHf(weighted, debt),
-    maxLtvBps: blendedBps(collateral, s.assets, "maxLtvBps"),
-    liquidationThresholdBps: blendedBps(
-      collateral,
-      s.assets,
-      "liquidationThresholdBps",
-    ),
-  };
+  return positionFromSnapshot(user, s);
 }
 
 export function allUsers(): string[] {
-  const keys = new Set([
-    ...Object.keys(state.holdings),
-    ...Object.keys(state.debts),
-    ADDRESSES.you,
-    ADDRESSES.whale,
-    ADDRESSES.atRisk,
-  ]);
-  return [...keys];
+  return listUsers(state);
 }
 
 export function refreshPoolDerived(s: ProtocolState): ProtocolState {
@@ -90,10 +69,7 @@ export function refreshPoolDerived(s: ProtocolState): ProtocolState {
 
 function allUsersFrom(s: ProtocolState): string[] {
   return [
-    ...new Set([
-      ...Object.keys(s.holdings),
-      ...Object.keys(s.debts),
-    ]),
+    ...new Set([...Object.keys(s.holdings), ...Object.keys(s.debts), ADDRESSES.you]),
   ];
 }
 

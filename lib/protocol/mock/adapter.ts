@@ -1,11 +1,9 @@
 "use client";
 
 import { fakeTxHash } from "@/lib/format";
-import {
-  BORROW_APR_BPS,
-  CLOSE_FACTOR_BPS,
-  LIQUIDATION_BONUS_BPS,
-} from "@/lib/mock/constants";
+import type { ProtocolClient } from "@/lib/protocol/client";
+import { BORROW_APR_BPS } from "@/lib/protocol/constants";
+import { ProtocolError } from "@/lib/protocol/errors";
 import {
   accrueDebt,
   applyRepay,
@@ -18,25 +16,26 @@ import {
   repayToTargetHf,
   splitRepay,
   weightedLiqUsd,
-} from "@/lib/mock/math";
+} from "@/lib/protocol/math";
 import {
   allUsers,
   derivePosition,
   getState,
   pushEvent,
   refreshPoolDerived,
+  resetState,
   setState,
-} from "@/lib/mock/store";
-import {
-  ProtocolError,
-  type AssetConfig,
-  type Debt,
-  type LiquidationResult,
-  type PoolPauseKey,
-  type Position,
-  type PriceData,
-  type VaultPauseKey,
-} from "@/lib/mock/types";
+  subscribe,
+} from "@/lib/protocol/mock/store";
+import type {
+  AssetConfig,
+  Debt,
+  LiquidateTxResult,
+  PoolPauseKey,
+  Position,
+  PriceData,
+  VaultPauseKey,
+} from "@/lib/protocol/types";
 
 function wait(): Promise<void> {
   const ms = 400 + Math.floor(Math.random() * 500);
@@ -497,7 +496,7 @@ export const engine = {
     liquidator: string,
     user: string,
     repayUsd: number,
-  ): Promise<LiquidationResult & { txHash: string }> {
+  ): Promise<LiquidateTxResult> {
     return run(() => {
       requireVaultOp("liquidation");
       requireAmount(repayUsd);
@@ -576,6 +575,7 @@ export const admin = {
     if (paused) {
       emit("OperationPaused", "vault", { note: `Vault ${op}` });
     }
+    return Promise.resolve();
   },
 
   setPoolPause(op: PoolPauseKey, paused: boolean) {
@@ -586,6 +586,7 @@ export const admin = {
     if (paused) {
       emit("OperationPaused", "pool", { note: `Pool ${op}` });
     }
+    return Promise.resolve();
   },
 
   setAssetSupported(symbol: string, supported: boolean) {
@@ -598,6 +599,7 @@ export const admin = {
     if (supported) {
       emit("AssetAdded", "vault", { asset: symbol });
     }
+    return Promise.resolve();
   },
 
   updateAssetConfig(
@@ -610,11 +612,13 @@ export const admin = {
         a.symbol === symbol ? { ...a, ...patch } : a,
       ),
     }));
+    return Promise.resolve();
   },
 
   setOraclePaused(paused: boolean) {
     setState((s) => ({ ...s, oraclePaused: paused }));
     if (paused) emit("OperationPaused", "oracle", { note: "Oracle updates" });
+    return Promise.resolve();
   },
 
   setStalenessThreshold(sec: number) {
@@ -623,6 +627,7 @@ export const admin = {
       stalenessThresholdSec: sec,
       prices: s.prices.map((p) => ({ ...p, stalenessThresholdSec: sec })),
     }));
+    return Promise.resolve();
   },
 
   markPriceStale(symbol: string, stale: boolean) {
@@ -644,13 +649,25 @@ export const admin = {
       asset: symbol,
       note: stale ? "Marked stale" : "Refreshed",
     });
+    return Promise.resolve();
   },
 
   setFeeders(feeders: string[]) {
     setState((s) => ({ ...s, feeders }));
+    return Promise.resolve();
   },
 };
 
-export const protocol = { vault, pool, oracle, engine, admin };
-
-export { CLOSE_FACTOR_BPS, LIQUIDATION_BONUS_BPS };
+export function createMockClient(): ProtocolClient {
+  return {
+    mode: "mock",
+    getSnapshot: getState,
+    subscribe,
+    reset: resetState,
+    vault,
+    pool,
+    oracle,
+    engine,
+    admin,
+  };
+}

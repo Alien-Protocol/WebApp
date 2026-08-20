@@ -112,20 +112,100 @@ export type WalletBalances = Record<string, number>;
 
 export type VaultHoldings = Record<string, number>;
 
-export type ProtocolErrorCode =
-  | "Invalid amount"
-  | "Insufficient supply"
-  | "Insufficient liquidity"
-  | "Exceeds borrow limit"
-  | "Below min collateral ratio"
-  | "Not liquidatable"
-  | "Insufficient wallet balance"
-  | "Asset not supported"
-  | "Oracle feed stale";
+export type AnalyticsPoint = {
+  day: string;
+  tvl: number;
+  borrowed: number;
+  utilization: number;
+};
 
-export class ProtocolError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ProtocolError";
-  }
+export type LiquidationStats = {
+  volumeUsd: number;
+  partialCount: number;
+  fullCount: number;
+  interestAccruedUsd: number;
+};
+
+export type ProtocolAnalytics = {
+  history: AnalyticsPoint[];
+  collateralPosted: Record<string, number>;
+  liquidationStats: LiquidationStats;
+};
+
+/** Read model the UI renders. Both mock and HTTP adapters must return this shape. */
+export type ProtocolSnapshot = {
+  pause: PauseFlags;
+  assets: AssetConfig[];
+  prices: PriceData[];
+  holdings: Record<string, VaultHoldings>;
+  debts: Record<string, Debt>;
+  supplies: Record<string, number>;
+  wallets: Record<string, WalletBalances>;
+  pool: PoolStats;
+  events: ProtocolEvent[];
+  oraclePaused: boolean;
+  stalenessThresholdSec: number;
+  feeders: string[];
+  analytics: ProtocolAnalytics;
+};
+
+export type TxResult = { txHash: string };
+
+export type RepayResult = TxResult & {
+  interestPaid: number;
+  principalPaid: number;
+  repaid: number;
+};
+
+export type AccrueResult = TxResult & { accrued?: number };
+
+export type LiquidateTxResult = LiquidationResult & TxResult;
+
+export function emptySnapshot(): ProtocolSnapshot {
+  return {
+    pause: {
+      vault: {
+        deposit: false,
+        borrow: false,
+        withdraw: false,
+        liquidation: false,
+        recovery: false,
+      },
+      pool: {
+        supply: false,
+        borrow: false,
+        repay: false,
+        withdrawLiquidity: false,
+      },
+    },
+    assets: [],
+    prices: [],
+    holdings: {},
+    debts: {},
+    supplies: {},
+    wallets: {},
+    pool: {
+      borrowAsset: "USDC",
+      interestRateBps: 0,
+      totalSupply: 0,
+      totalBorrowed: 0,
+      availableLiquidity: 0,
+      utilizationBps: 0,
+      tvlUsd: 0,
+    },
+    events: [],
+    oraclePaused: false,
+    stalenessThresholdSec: 3600,
+    feeders: [],
+    analytics: {
+      history: [],
+      collateralPosted: {},
+      liquidationStats: {
+        volumeUsd: 0,
+        partialCount: 0,
+        fullCount: 0,
+        interestAccruedUsd: 0,
+      },
+    },
+  };
 }

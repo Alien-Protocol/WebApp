@@ -17,15 +17,15 @@ import {
   CLOSE_FACTOR_BPS,
   LIQUIDATION_BONUS_BPS,
   TARGET_HF_AFTER_LIQ_BPS,
-} from "@/lib/mock/constants";
+} from "@/lib/protocol/constants";
 import {
   calculateBonusUsd,
   closeFactorMax,
   healthBand,
   repayToTargetHf,
   weightedLiqUsd,
-} from "@/lib/mock/math";
-import { allUsers, derivePosition } from "@/lib/mock/store";
+} from "@/lib/protocol/math";
+import { derivePosition, listUsers } from "@/lib/protocol/selectors";
 import { engine } from "@/lib/protocol";
 import { useMemo, useState } from "react";
 
@@ -39,7 +39,7 @@ export default function LiquidatePage() {
   const [selected, setSelected] = useState<string>(ADDRESSES.atRisk);
   const [amount, setAmount] = useState("");
   const liquidator = address ?? ADDRESSES.you;
-  const positions = allUsers().map((u) => derivePosition(u, state));
+  const positions = listUsers(state).map((u) => derivePosition(u, state));
   const filtered = positions.filter((p) => {
     const hf = p.healthFactor;
     const liq = hf !== "inf" && hf < 1;

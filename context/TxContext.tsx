@@ -8,9 +8,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ProtocolError } from "@/lib/mock/types";
+import { appConfig } from "@/lib/config";
 import { fakeTxHash } from "@/lib/format";
-import { STELLAR_EXPERT_TX } from "@/lib/mock/constants";
+import { ProtocolError } from "@/lib/protocol/errors";
 
 export type TxPhase = "idle" | "signing" | "pending" | "success" | "error";
 
@@ -119,7 +119,7 @@ export function TxProvider({ children }: { children: ReactNode }) {
     [close, pushToast],
   );
 
-  const expertUrl = txHash ? `${STELLAR_EXPERT_TX}/${txHash}` : null;
+  const expertUrl = txHash ? `${appConfig.explorerTxUrl}/${txHash}` : null;
 
   const value = useMemo(
     () => ({

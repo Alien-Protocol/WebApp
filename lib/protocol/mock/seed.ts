@@ -1,4 +1,4 @@
-import { ADDRESSES, BORROW_APR_BPS } from "@/lib/mock/constants";
+import { ADDRESSES, BORROW_APR_BPS } from "@/lib/protocol/constants";
 import { fakeTxHash } from "@/lib/format";
 import type {
   AssetConfig,
@@ -7,28 +7,16 @@ import type {
   PoolStats,
   PriceData,
   ProtocolEvent,
+  ProtocolSnapshot,
   VaultHoldings,
   WalletBalances,
-} from "@/lib/mock/types";
+} from "@/lib/protocol/types";
 
 const now = () => Math.floor(Date.now() / 1000);
 
-export type SeedState = {
-  pause: PauseFlags;
-  assets: AssetConfig[];
-  prices: PriceData[];
-  holdings: Record<string, VaultHoldings>;
-  debts: Record<string, Debt>;
-  supplies: Record<string, number>;
-  wallets: Record<string, WalletBalances>;
-  pool: PoolStats;
-  events: ProtocolEvent[];
-  oraclePaused: boolean;
-  stalenessThresholdSec: number;
-  feeders: string[];
-};
+export type SeedState = ProtocolSnapshot;
 
-export function createSeed(): SeedState {
+export function createSeed(): ProtocolSnapshot {
   const t = now();
   const staleThreshold = 3600;
 
@@ -339,6 +327,11 @@ export function createSeed(): SeedState {
     oraclePaused: false,
     stalenessThresholdSec: staleThreshold,
     feeders: [ADDRESSES.feeder1, ADDRESSES.feeder2],
+    analytics: {
+      history: ANALYTICS_HISTORY,
+      collateralPosted: COLLATERAL_POSTED,
+      liquidationStats: LIQUIDATION_STATS,
+    },
   };
 }
 

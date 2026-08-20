@@ -7,14 +7,14 @@ import {
   MIN_COLLATERAL_RATIO,
   SECONDS_PER_YEAR,
   TARGET_HF_AFTER_LIQ_BPS,
-} from "@/lib/mock/constants";
+} from "@/lib/protocol/constants";
 import type {
   AssetConfig,
   CollateralAsset,
   Debt,
   PriceData,
   VaultHoldings,
-} from "@/lib/mock/types";
+} from "@/lib/protocol/types";
 
 export type HealthBand = "very-safe" | "safe" | "liquidatable" | "none";
 

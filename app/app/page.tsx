@@ -11,15 +11,15 @@ import { useTx } from "@/context/TxContext";
 import { useWallet } from "@/context/WalletContext";
 import { useProtocolState } from "@/hooks/useProtocol";
 import { formatAmount, formatHf, formatUsd, relativeTime } from "@/lib/format";
-import { ADDRESSES, BORROW_APR_BPS } from "@/lib/mock/constants";
+import { ADDRESSES, BORROW_APR_BPS } from "@/lib/protocol/constants";
 import {
   borrowLimitRemaining,
   computeHf,
   previewHfAfterBorrow,
   weightedLiqUsd,
   weightedMaxBorrowUsd,
-} from "@/lib/mock/math";
-import { derivePosition } from "@/lib/mock/store";
+} from "@/lib/protocol/math";
+import { derivePosition } from "@/lib/protocol/selectors";
 import { pool } from "@/lib/protocol";
 import { useMemo, useState } from "react";
 

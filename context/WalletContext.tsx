@@ -8,8 +8,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ADDRESSES } from "@/lib/mock/constants";
-import { resetState } from "@/lib/mock/store";
+import { protocol } from "@/lib/protocol";
+import { ADDRESSES } from "@/lib/protocol/constants";
 
 type WalletStatus = "disconnected" | "connecting" | "connected";
 
@@ -37,7 +37,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const disconnect = useCallback(() => {
     setAddress(null);
     setStatus("disconnected");
-    resetState();
+    protocol.reset();
   }, []);
 
   const value = useMemo(

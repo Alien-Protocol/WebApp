@@ -1,5 +1,5 @@
 import { truncateAddress } from "@/lib/format";
-import { USER_LABELS } from "@/lib/mock/constants";
+import { USER_LABELS } from "@/lib/protocol/constants";
 import { cn } from "@/lib/cn";
 
 export function AddressChip({

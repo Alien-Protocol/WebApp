@@ -6,7 +6,7 @@ import {
   TreitLogo,
   UsdcLogo,
   XlmLogo,
-} from "@/components/app/token-logos";
+} from "@/components/app/TokenLogos";
 import type { ReactNode } from "react";
 
 const LOGOS: Record<string, (size: number) => ReactNode> = {

@@ -18,8 +18,7 @@ export const HF_SAFE = 1.0;
 export const INTEREST_MODEL = "linear per-second on ledger time";
 export const REPAYMENT_ORDER = "interest first, then principal";
 
-export const NETWORK_LABEL = "Stellar Testnet (mock)";
-export const STELLAR_EXPERT_TX = "https://stellar.expert/explorer/testnet/tx";
+export const NETWORK_LABEL = "Stellar Testnet";
 
 export const ADDRESSES = {
   you: "GABC7Y2KQM4NWP5XHR8T3VJ6LDS0F9E1CUIZMB4KQP2WNX7K2",

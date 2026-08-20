@@ -8,9 +8,8 @@ import { PageHeader } from "@/components/app/PageHeader";
 import { useProtocolState } from "@/hooks/useProtocol";
 import { cn } from "@/lib/cn";
 import { formatUsd, relativeTime } from "@/lib/format";
-import { COLLATERAL_POSTED } from "@/lib/mock/seed";
-import { computeHf, configOf, priceOf } from "@/lib/mock/math";
-import type { AssetConfig } from "@/lib/mock/types";
+import { computeHf, configOf, priceOf } from "@/lib/protocol/math";
+import type { AssetConfig } from "@/lib/protocol/types";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 
@@ -81,7 +80,7 @@ export default function MarketsPage() {
                     <td className="px-3 py-4 text-right tabular-nums">
                       {isUsdc
                         ? formatUsd(state.pool.totalSupply)
-                        : formatUsd(COLLATERAL_POSTED[a.symbol] ?? 0)}
+                        : formatUsd(state.analytics.collateralPosted[a.symbol] ?? 0)}
                     </td>
                     <td className="px-5 py-4 text-right tabular-nums">
                       {isUsdc ? `${(state.pool.utilizationBps / 100).toFixed(2)}%` : "—"}

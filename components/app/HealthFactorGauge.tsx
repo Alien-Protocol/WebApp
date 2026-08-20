@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/cn";
 import { formatHf } from "@/lib/format";
-import { healthBand, healthLabel } from "@/lib/mock/math";
+import { healthBand, healthLabel } from "@/lib/protocol/math";
 
 export function HealthFactorGauge({
   hf,

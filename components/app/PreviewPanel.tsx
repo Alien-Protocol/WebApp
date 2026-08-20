@@ -1,5 +1,5 @@
 import { formatHf, formatUsd } from "@/lib/format";
-import { healthLabel } from "@/lib/mock/math";
+import { healthLabel } from "@/lib/protocol/math";
 import type { ReactNode } from "react";
 
 export function PreviewPanel({
