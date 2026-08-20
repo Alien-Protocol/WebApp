@@ -66,6 +66,7 @@ function useTypewriter(texts: string[], speed = 60, pause = 2200) {
         setCharIdx((c) => c - 1);
       }, speed / 2);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- existing typewriter cycle
       setDeleting(false);
       setTextIdx((i) => (i + 1) % texts.length);
     }
@@ -309,9 +310,14 @@ export default function Home() {
               Alien Protocol
             </span>
           </div>
-          <a href="https://github.com/Alien-Protocol" target="_blank" rel="noreferrer" className="github-btn">
-            GitHub ↗
-          </a>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <a href="/app" className="github-btn">
+              Launch App
+            </a>
+            <a href="https://github.com/Alien-Protocol" target="_blank" rel="noreferrer" className="github-btn">
+              GitHub ↗
+            </a>
+          </div>
         </nav>
 
         {/* ══ HERO ══ */}

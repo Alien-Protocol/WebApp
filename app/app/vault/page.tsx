@@ -1,0 +1,231 @@
+"use client";
+
+import { AmountInput } from "@/components/app/AmountInput";
+import { AssetIcon } from "@/components/app/AssetIcon";
+import { EmptyState } from "@/components/app/EmptyState";
+import { GlassCard } from "@/components/app/MetricCard";
+import { HealthFactorGauge } from "@/components/app/HealthFactorGauge";
+import { ConnectWalletButton } from "@/components/app/ConnectWalletButton";
+import { PageHeader } from "@/components/app/PageHeader";
+import { useTx } from "@/context/TxContext";
+import { useWallet } from "@/context/WalletContext";
+import { useProtocolState } from "@/hooks/useProtocol";
+import { formatAmount, formatUsd, parseAmount } from "@/lib/format";
+import { ADDRESSES, MIN_COLLATERAL_RATIO } from "@/lib/mock/constants";
+import { isWithdrawalSafeCalc, priceOf } from "@/lib/mock/math";
+import { derivePosition } from "@/lib/mock/store";
+import { vault } from "@/lib/protocol";
+import { useMemo, useState } from "react";
+
+export default function VaultPage() {
+  const { isConnected, address } = useWallet();
+  const state = useProtocolState();
+  const { execute } = useTx();
+  const user = address ?? ADDRESSES.you;
+  const [tab, setTab] = useState<"deposit" | "withdraw">("deposit");
+  const supported = state.assets.filter(
+    (a) => a.supported && a.symbol !== "USDC",
+  );
+  const [symbol, setSymbol] = useState(supported[0]?.symbol ?? "tBILL");
+  const [amount, setAmount] = useState("");
+  const pos = derivePosition(user, state);
+  const px = priceOf(symbol, state.prices)?.price ?? 0;
+  const n = parseAmount(amount);
+  const walletBal = state.wallets[user]?.[symbol] ?? 0;
+  const held = state.holdings[user]?.[symbol] ?? 0;
+  const debt = state.debts[user]?.total ?? 0;
+  const depositPaused = state.pause.vault.deposit;
+  const withdrawPaused = state.pause.vault.withdraw;
+
+  const safe = useMemo(
+    () =>
+      isWithdrawalSafeCalc(
+        state.holdings[user] ?? {},
+        symbol,
+        n,
+        debt,
+        state.prices,
+        state.assets,
+      ),
+    [state, user, symbol, n, debt],
+  );
+
+  if (!isConnected) {
+    return (
+      <EmptyState
+        title="Connect to manage the vault"
+        body="Deposit tokenized RWA collateral or withdraw against your position."
+        action={<ConnectWalletButton />}
+      />
+    );
+  }
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
+      <div className="space-y-4">
+        <PageHeader kicker="Collateral vault" title="Deposit / withdraw" />
+
+        <div className="flex gap-2">
+          <button type="button" className="tab-btn" data-active={tab === "deposit"} onClick={() => setTab("deposit")}>
+            Deposit
+          </button>
+          <button type="button" className="tab-btn" data-active={tab === "withdraw"} onClick={() => setTab("withdraw")}>
+            Withdraw
+          </button>
+        </div>
+
+        <GlassCard className="space-y-4">
+          <label className="block text-sm text-white/50">
+            Asset
+            <select
+              value={symbol}
+              onChange={(e) => {
+                setSymbol(e.target.value);
+                setAmount("");
+              }}
+              className="mt-1 w-full border border-white/25 bg-black px-3 py-2 font-exo text-white outline-none"
+            >
+              {supported.map((a) => (
+                <option key={a.symbol} value={a.symbol}>
+                  {a.symbol} — {a.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {tab === "deposit" ? (
+            <>
+              {depositPaused ? (
+                <p className="border border-white/40 bg-white/[0.04] px-3 py-2 font-exo text-sm text-white">
+                  Vault paused: deposit
+                </p>
+              ) : null}
+              <AmountInput
+                symbol={symbol}
+                value={amount}
+                onChange={setAmount}
+                max={walletBal}
+                usdPrice={px}
+                disabled={depositPaused}
+              />
+              <p className="text-xs text-white/40">
+                USD preview {formatUsd(n * px)} from mock oracle.
+              </p>
+              <button
+                type="button"
+                className="btn-primary"
+                disabled={depositPaused || n <= 0 || n > walletBal}
+                onClick={() =>
+                  execute(
+                    {
+                      title: "Deposit",
+                      detail: `Deposit ${n} ${symbol} into the collateral vault.`,
+                    },
+                    () => vault.deposit(user, symbol, n),
+                    `Deposited ${n} ${symbol}`,
+                  )
+                }
+              >
+                Deposit
+              </button>
+            </>
+          ) : (
+            <>
+              {withdrawPaused ? (
+                <p className="border border-white/40 bg-white/[0.04] px-3 py-2 font-exo text-sm text-white">
+                  Vault paused: withdraw
+                </p>
+              ) : null}
+              <p className="text-xs text-white/45">
+                Posted {formatAmount(held)} {symbol}
+              </p>
+              <AmountInput
+                symbol={symbol}
+                value={amount}
+                onChange={setAmount}
+                max={held}
+                usdPrice={px}
+                disabled={withdrawPaused}
+              />
+              {!safe && n > 0 ? (
+                <p className="border border-white/50 bg-white/[0.06] px-3 py-2 font-exo text-sm text-white">
+                  Remaining collateral would fall below 110% of debt (
+                  {MIN_COLLATERAL_RATIO * 100}% min ratio). Withdraw is blocked.
+                </p>
+              ) : null}
+              <button
+                type="button"
+                className="btn-primary"
+                disabled={withdrawPaused || n <= 0 || n > held || !safe}
+                onClick={() =>
+                  execute(
+                    {
+                      title: "Withdraw",
+                      detail: `Withdraw ${n} ${symbol} from the collateral vault.`,
+                    },
+                    () => vault.withdraw(user, symbol, n),
+                    `Withdrew ${n} ${symbol}`,
+                  )
+                }
+              >
+                Withdraw
+              </button>
+            </>
+          )}
+        </GlassCard>
+      </div>
+
+      <GlassCard className="h-fit space-y-4 lg:sticky lg:top-28">
+        <h2 className="font-orbitron text-base tracking-wide">Position summary</h2>
+        <HealthFactorGauge hf={pos.healthFactor} size={112} />
+        <p className="text-sm text-white/50">
+          Collateral {formatUsd(pos.collateralValueUsd)}
+        </p>
+        <ul className="space-y-2 text-sm">
+          {pos.collateral.length ? (
+            pos.collateral.map((c) => (
+              <li key={c.symbol} className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-2">
+                  <AssetIcon symbol={c.symbol} size={32} />
+                  {c.symbol}
+                </span>
+                <span className="tabular-nums">
+                  {formatAmount(c.amount)} · {formatUsd(c.valueUsd)}
+                </span>
+              </li>
+            ))
+          ) : (
+            <li className="text-white/40">No collateral posted.</li>
+          )}
+        </ul>
+        <p className="text-xs text-white/35">
+          Blended max LTV {(pos.maxLtvBps / 100).toFixed(2)}% (
+          {pos.maxLtvBps} bps) · liq. threshold{" "}
+          {(pos.liquidationThresholdBps / 100).toFixed(2)}% (
+          {pos.liquidationThresholdBps} bps)
+        </p>
+        <button
+          type="button"
+          className="btn-ghost w-full"
+          disabled={state.pause.vault.recovery}
+          onClick={() =>
+            execute(
+              {
+                title: "Recovery",
+                detail:
+                  "Vault recovery backstop (V1 preview). No on-chain recovery is executed in this dummy.",
+              },
+              async () => ({ txHash: `recovery-${Date.now()}` }),
+              "Recovery signal recorded (demo)",
+            )
+          }
+        >
+          Recovery
+        </button>
+        {state.pause.vault.recovery ? (
+          <p className="text-xs text-white/50">Vault paused: recovery</p>
+        ) : null}
+      </GlassCard>
+    </div>
+  );
+}

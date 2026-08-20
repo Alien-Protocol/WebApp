@@ -1,10 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { ReactNode } from "react";
+import { Exo_2, Geist_Mono, Inter, Orbitron, Rajdhani } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+});
+
+const exo = Exo_2({
+  variable: "--font-exo",
+  subsets: ["latin"],
+});
+
+const rajdhani = Rajdhani({
+  variable: "--font-rajdhani",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -14,18 +31,19 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Alien Protocol",
-  description: "Alien Protocol",
+  description:
+    "RWA lending infrastructure on Stellar + Soroban. Dummy frontend.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${orbitron.variable} ${exo.variable} ${rajdhani.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>

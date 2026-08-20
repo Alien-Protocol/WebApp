@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
 const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL!;
-const RESEND_API_KEY = process.env.RESEND_API_KEY!;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
-const resend = new Resend(RESEND_API_KEY);
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
     });
 
     if (!sheetsRes.ok) throw new Error("Failed to save to Google Sheets");
+
+    if (!resend) throw new Error("Email provider is not configured");
 
     // ── 2. Send confirmation email to the SUBSCRIBER ──────────────────────
     await resend.emails.send({
